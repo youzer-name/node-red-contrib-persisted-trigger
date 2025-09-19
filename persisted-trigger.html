@@ -1,0 +1,226 @@
+<script type="text/javascript">
+RED.nodes.registerType('persisted-trigger', {
+    category: 'function',
+    color: '#E6E0F8',
+    defaults: {
+        name: { value: "" },
+        op1: { value: "" },
+        op1type: { value: "pay" },
+        op2: { value: "" },
+        op2type: { value: "nothing" },
+        duration: { value: "5" },
+        units: { value: "s" },
+        extend: { value: false },
+        overrideDelay: { value: false },
+        mode: { value: "wait" },
+        reset: { value: "" },
+        bymode: { value: "all" },
+        by: { value: "topic" },
+        secondOutput: { value: false },
+        expired: { value: "discard" }
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: "timer.png",
+    label: function () {
+        return this.name || "persisted trigger";
+    },
+    oneditprepare: function () {
+        // Shared base types
+        var baseTypes = [
+            { value: "pay", label: "existing message object", icon: "fa fa-envelope", hasValue: false },
+            { value: "str", label: "string", icon: "fa fa-quote-right" },
+            { value: "num", label: "number", icon: "fa fa-hashtag" },
+            { value: "bool", label: "boolean", icon: "fa fa-adjust", options: ["true", "false"] },
+            { value: "json", label: "JSON", icon: "fa fa-code", validate: RED.validators.json, expand: true },
+            { value: "bin", label: "buffer", icon: "fa fa-database" },
+            {
+                value: "date",
+                label: "timestamp",
+                icon: "fa fa-clock-o",
+                options: [
+                    { value: "", label: "milliseconds since epoch" },
+                    { value: "iso", label: "ISO string" },
+                    { value: "date", label: "JavaScript Date object" }
+                ]
+            },
+            { value: "env", label: "env variable", icon: "fa fa-leaf" },
+            { value: "flow", label: "flow context", icon: "fa fa-tag" },
+            { value: "global", label: "global context", icon: "fa fa-globe" },
+            { value: "nothing", label: "nothing", icon: "fa fa-ban", hasValue: false }
+        ];
+
+        // For op2, add "latest" and "original"
+        var thenTypes = baseTypes.filter(t => t.value !== "pay").concat([
+            { value: "payl", label: "latest message", hasValue: false, icon: "fa fa-envelope" },
+            { value: "orig", label: "original message object", hasValue: false, icon: "fa fa-archive" }
+        ]);
+
+        // TypedInputs
+        $("#node-input-op1").typedInput({
+            default: 'pay',
+            types: baseTypes
+        }).typedInput('type', this.op1type).typedInput('value', this.op1);
+
+        $("#node-input-op2").typedInput({
+            default: 'nothing',
+            types: thenTypes
+        }).typedInput('type', this.op2type).typedInput('value', this.op2);
+
+        // Handling mode toggle
+        function updateByVisibility() {
+            var bm = $("#node-input-bymode").val();
+            if (bm === "each") {
+                $("#node-input-by-container").show();
+            } else {
+                $("#node-input-by-container").hide();
+            }
+        }
+        $("#node-input-bymode").change(updateByVisibility);
+        updateByVisibility();
+
+// Populate context store dropdown
+var stores = RED.settings.context.stores || [];
+var $store = $("#node-input-store");
+$store.empty();
+stores.forEach(function(s) {
+    $("<option></option>").val(s).text(s).appendTo($store);
+});
+if (this.store && stores.indexOf(this.store) !== -1) {
+    $store.val(this.store);
+}
+
+        // Mode handling
+        function updateModeUI() {
+            let mode = $("#node-input-mode").val();
+            if (mode === "wait") {
+                $(".form-row-time").show();
+                $(".form-row-extend").show();
+                $(".form-row-override").show();
+                $(".form-row-then").show();
+                $(".form-row-secondOutput").show();
+            } else if (mode === "resend") {
+                $(".form-row-time").show();
+                $(".form-row-extend").hide();
+                $(".form-row-override").show();
+                $(".form-row-then").hide();
+                $(".form-row-secondOutput").hide();
+            } else if (mode === "waitreset") {
+                $(".form-row-time").hide();
+                $(".form-row-extend").hide();
+                $(".form-row-override").hide();
+                $(".form-row-then").hide();
+                $(".form-row-secondOutput").hide();
+            }
+        }
+        $("#node-input-mode").change(updateModeUI);
+        updateModeUI();
+    },
+    oneditsave: function () {
+        this.op1 = $("#node-input-op1").typedInput('value');
+        this.op1type = $("#node-input-op1").typedInput('type');
+        this.op2 = $("#node-input-op2").typedInput('value');
+        this.op2type = $("#node-input-op2").typedInput('type');
+    }
+});
+</script>
+
+<script type="text/x-red" data-template-name="persisted-trigger">
+    <div class="form-row">
+        <label for="node-input-op1"><i class="fa fa-sign-out"></i> Send</label>
+        <input type="text" id="node-input-op1" style="width:70%">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-mode"><i class="fa fa-clock-o"></i> then</label>
+        <select id="node-input-mode" style="width:70%">
+            <option value="wait">wait for</option>
+            <option value="waitreset">wait until reset</option>
+            <option value="resend">resend it every</option>
+        </select>
+    </div>
+
+    <div class="form-row form-row-time">
+        <label for="node-input-duration"><i class="fa fa-hourglass"></i></label>
+        <input type="text" id="node-input-duration" style="width:100px">
+        <select id="node-input-units" style="width:120px">
+            <option value="ms">milliseconds</option>
+            <option value="s">seconds</option>
+            <option value="min">minutes</option>
+            <option value="hr">hours</option>
+        </select>
+    </div>
+
+    <div class="form-row form-row-extend">
+        <label>&nbsp;</label>
+        <label style="white-space:nowrap; vertical-align:middle;">
+            <input type="checkbox" id="node-input-extend" style="vertical-align:middle; margin-top:-2px;">
+            <span style="vertical-align:middle; margin-left:6px;">Extend delay if new message arrives</span>
+        </label>
+    </div>
+
+    <div class="form-row form-row-override">
+        <label>&nbsp;</label>
+        <label style="white-space:nowrap; vertical-align:middle;">
+            <input type="checkbox" id="node-input-overrideDelay" style="vertical-align:middle; margin-top:-2px;">
+            <span style="vertical-align:middle; margin-left:6px;">Override delay with msg.delay</span>
+        </label>
+    </div>
+
+    <div class="form-row form-row-then">
+        <label for="node-input-op2"><i class="fa fa-sign-out"></i> then send</label>
+        <input type="text" id="node-input-op2" style="width:70%">
+    </div>
+
+    <div class="form-row form-row-secondOutput">
+        <label>&nbsp;</label>
+        <label style="white-space:nowrap; vertical-align:middle;">
+            <input type="checkbox" id="node-input-secondOutput" style="vertical-align:middle; margin-top:-2px;">
+            <span style="vertical-align:middle; margin-left:6px;">Send second message to separate output</span>
+        </label>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-reset"><i class="fa fa-undo"></i> Reset the trigger if:</label>
+        <div style="display:inline-block;vertical-align:top;width:70%">
+            <ul style="margin:0">
+                <li>msg.reset is set</li>
+                <li>msg.payload equals <input type="text" id="node-input-reset" style="width:150px"></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-bymode"><i class="fa fa-random"></i> Handling</label>
+        <select id="node-input-bymode" style="width:150px">
+            <option value="all">all messages</option>
+            <option value="each">each</option>
+        </select>
+        <span id="node-input-by-container" style="margin-left:5px; display:none;">
+            msg.<input type="text" id="node-input-by" style="width:120px" value="topic">
+        </span>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-expired"><i class="fa fa-history"></i> Expired handling</label>
+        <select id="node-input-expired" style="width:70%">
+            <option value="discard">discard</option>
+            <option value="send">send anyway</option>
+            <option value="flag">flag and send</option>
+        </select>
+    </div>
+
+<div class="form-row">
+    <label for="node-input-store"><i class="fa fa-database"></i> Context store</label>
+    <select id="node-input-store" style="width:70%"></select>
+</div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" style="width:70%">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="persisted-trigger">
+    <p>A persisted version of the Trigger node. Behaves like the core Trigger but survives Node-RED restarts.</p>
+</script>

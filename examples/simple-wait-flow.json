@@ -1,0 +1,72 @@
+[
+  {
+    "id": "inject1",
+    "type": "inject",
+    "z": "flow1",
+    "name": "Trigger now",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "hello",
+    "payloadType": "str",
+    "x": 160,
+    "y": 100,
+    "wires": [
+      [
+        "persisted1"
+      ]
+    ]
+  },
+  {
+    "id": "persisted1",
+    "type": "persisted-trigger",
+    "z": "flow1",
+    "name": "Wait 10s then send",
+    "op1": "",
+    "op1type": "str",
+    "op2": "",
+    "op2type": "str",
+    "duration": "10",
+    "units": "s",
+    "extend": false,
+    "overrideDelay": false,
+    "mode": "wait",
+    "reset": "",
+    "bymode": "all",
+    "by": "topic",
+    "secondOutput": false,
+    "expired": "discard",
+    "x": 390,
+    "y": 100,
+    "wires": [
+      [
+        "debug1"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "debug1",
+    "type": "debug",
+    "z": "flow1",
+    "name": "output",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 620,
+    "y": 100,
+    "wires": []
+  }
+]

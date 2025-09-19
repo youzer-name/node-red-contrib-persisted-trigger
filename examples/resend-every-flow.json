@@ -1,0 +1,67 @@
+[
+  {
+    "id": "inject2",
+    "type": "inject",
+    "z": "flow2",
+    "name": "Start resend",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "ping",
+    "payloadType": "str",
+    "x": 160,
+    "y": 200,
+    "wires": [
+      [
+        "persisted2"
+      ]
+    ]
+  },
+  {
+    "id": "persisted2",
+    "type": "persisted-trigger",
+    "z": "flow2",
+    "name": "Resend every 5s",
+    "op1": "start",
+    "op1type": "str",
+    "op2": "tick",
+    "op2type": "str",
+    "duration": "5",
+    "units": "s",
+    "extend": false,
+    "overrideDelay": false,
+    "mode": "resend",
+    "reset": "",
+    "bymode": "all",
+    "by": "topic",
+    "secondOutput": false,
+    "expired": "discard",
+    "x": 400,
+    "y": 200,
+    "wires": [
+      [
+        "debug2"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "debug2",
+    "type": "debug",
+    "z": "flow2",
+    "name": "resend output",
+    "active": true,
+    "tosidebar": true,
+    "complete": "true",
+    "targetType": "full",
+    "x": 630,
+    "y": 200,
+    "wires": []
+  }
+]

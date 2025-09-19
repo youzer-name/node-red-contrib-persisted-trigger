@@ -1,0 +1,82 @@
+[
+  {
+    "id": "inject3",
+    "type": "inject",
+    "z": "flow3",
+    "name": "Trigger for 30s",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "delayed",
+    "payloadType": "str",
+    "x": 160,
+    "y": 300,
+    "wires": [
+      [
+        "persisted3"
+      ]
+    ]
+  },
+  {
+    "id": "persisted3",
+    "type": "persisted-trigger",
+    "z": "flow3",
+    "name": "Flag expired after restart",
+    "op1": "msg",
+    "op1type": "pay",
+    "op2": "msg",
+    "op2type": "pay",
+    "duration": "30",
+    "units": "s",
+    "extend": false,
+    "overrideDelay": false,
+    "mode": "wait",
+    "reset": "",
+    "bymode": "all",
+    "by": "topic",
+    "secondOutput": true,
+    "expired": "flag",
+    "x": 440,
+    "y": 300,
+    "wires": [
+      [
+        "debug3a"
+      ],
+      [
+        "debug3b"
+      ]
+    ]
+  },
+  {
+    "id": "debug3a",
+    "type": "debug",
+    "z": "flow3",
+    "name": "first output (send now)",
+    "active": true,
+    "tosidebar": true,
+    "complete": "true",
+    "targetType": "full",
+    "x": 700,
+    "y": 280,
+    "wires": []
+  },
+  {
+    "id": "debug3b",
+    "type": "debug",
+    "z": "flow3",
+    "name": "second output (then send / expired)",
+    "active": true,
+    "tosidebar": true,
+    "complete": "true",
+    "targetType": "full",
+    "x": 730,
+    "y": 320,
+    "wires": []
+  }
+]
