@@ -1,7 +1,7 @@
 {
   "name": "node-red-contrib-persisted-trigger",
-  "version": "1.0.4",
-  "description": "Persisted trigger node \u2013 drop\u2011in replacement for the core Trigger node",
+  "version": "1.0.5",
+  "description": "Persisted trigger node – drop‑in replacement for the core Trigger node",
   "main": "persisted-trigger.js",
   "repository": {
     "type": "git",
